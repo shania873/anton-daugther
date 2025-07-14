@@ -1,0 +1,6 @@
+
+monenv
+monenv/lib/python3.11/site-packages/fsspec/json.py
+monenv/lib/python3.11/site-packages/fsspec/registry.py
+monenv/lib/python3.11/site-packages/fsspec/spec.py
+monenv/lib/python3.11/site-packages/fsspec/utils.py
