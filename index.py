@@ -166,46 +166,43 @@ if detected_language == "en":
 else:
     print("\n📝 Transcription (extrait) :", full_text[:500])
 
-# === 4. Résumé avec un modèle open source ===
+# === 4. Résumé avec Ollama (llama3) ===
+import requests
+import json
+
 print("\n" + "=" * 60)
 print("ÉTAPE 4: RÉSUMÉ")
 print("=" * 60)
-print("Chargement du modèle de résumé...")
-print("  [10%] Initialisation...")
-model_name = "t5-small"
+print("Connexion à Ollama...")
 
-print("  [30%] Modèle chargé")
-try:
-    summarizer = pipeline("summarization", model=model_name)
-except KeyError:
+def summarize_with_ollama(text, model="llama3"):
+    prompt = f"""Voici une transcription audio. Fais un résumé concis en bullet points des points importants à retenir.
+Réponds uniquement avec les bullet points, en français, sans introduction.
+
+Transcription :
+{text[:6000]}"""
+
     try:
-        summarizer = pipeline("text-generation", model=model_name)
-    except KeyError:
-        summarizer = None
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={"model": model, "prompt": prompt, "stream": False},
+            timeout=120
+        )
+        response.raise_for_status()
+        return response.json().get("response", "").strip()
+    except requests.exceptions.ConnectionError:
+        print("  ❌ Ollama n'est pas lancé. Ouvre l'app Ollama et réessaie.")
+        return None
+    except Exception as e:
+        print(f"  ❌ Erreur Ollama : {e}")
+        return None
 
-print("  [50%] Résumé en cours...")
-# On découpe le texte en morceaux si trop long
-chunks = [full_text[i:i+1024] for i in range(0, len(full_text), 1024)]
-summaries = []
+print("  [50%] Résumé en cours (peut prendre 1-2 minutes)...")
+final_summary = summarize_with_ollama(full_text, model="llama3")
 
-if summarizer:
-    for i, chunk in enumerate(chunks):
-        pct = 50 + int((i / len(chunks)) * 40)
-        print(f"  [{pct}%] Résumé du chunk {i+1}/{len(chunks)}")
-        try:
-            output = summarizer(chunk, max_length=150, min_length=50, do_sample=False)
-            if isinstance(output, list) and len(output) > 0:
-                summary = output[0].get('summary_text', output[0].get('generated_text', chunk[:100]))
-            else:
-                summary = str(output)[:150]
-            summaries.append(summary)
-        except Exception as e:
-            print(f"  Erreur lors du résumé d'un chunk: {e}")
-            summaries.append(chunk[:200])
-else:
-    summaries = [full_text[:200]]
+if final_summary is None:
+    final_summary = full_text[:300]
 
-final_summary = "\n\n".join(summaries)
 print("  [90%] Traitement du résumé final...")
 
 # === FONCTION POUR FORMATER LE TEXTE EN PARAGRAPHES ===
@@ -240,7 +237,7 @@ def format_text_into_paragraphs(text, width=100):
     if current_para:
         paragraphs.append(' '.join(current_para))
     
-    return '\n\n'.join(paragraphs)
+    return '\n'.join(paragraphs)
 
 # === 5. Sauvegarder transcription + résumé dans un fichier texte ===
 print("\n" + "=" * 60)
@@ -256,27 +253,27 @@ formatted_summary = format_text_into_paragraphs(final_summary)
 with open(output_file, 'w', encoding='utf-8') as f:
     f.write("╔" + "═" * 78 + "╗\n")
     f.write("║" + " TRANSCRIPTION ET RÉSUMÉ AUTOMATIQUE ".center(78) + "║\n")
-    f.write("╚" + "═" * 78 + "╝\n\n")
+    f.write("╚" + "═" * 78 + "╝\n")
     
     f.write("📋 Métadonnées:\n")
     f.write("-" * 80 + "\n")
     f.write(f"  • URL: {VIDEO_URL}\n")
     f.write(f"  • Langue: {detected_language.upper()}\n")
-    f.write(f"  • Longueur: {len(full_text.split())} mots\n\n")
+    f.write(f"  • Longueur: {len(full_text.split())} mots\n")
     
     f.write("\n" + "─" * 80 + "\n")
     f.write("📝 TRANSCRIPTION COMPLÈTE\n")
-    f.write("─" * 80 + "\n\n")
+    f.write("─" * 80 + "\n")
     # Ajouter indentation aux paragraphes
-    for para in formatted_text.split('\n\n'):
-        f.write("    " + para + "\n\n")
+    for para in formatted_text.split('\n'):
+        f.write("    " + para + "\n")
     
     f.write("\n" + "─" * 80 + "\n")
     f.write("✨ RÉSUMÉ\n")
-    f.write("─" * 80 + "\n\n")
+    f.write("─" * 80 + "\n")
     # Ajouter indentation aux paragraphes du résumé
-    for para in formatted_summary.split('\n\n'):
-        f.write("    " + para + "\n\n")
+    for para in formatted_summary.split('\n'):
+        f.write("    " + para + "\n")
     
     f.write("\n" + "═" * 80 + "\n")
 
