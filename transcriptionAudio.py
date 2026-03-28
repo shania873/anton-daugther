@@ -37,7 +37,7 @@ print("ÉTAPE 2: TRANSCRIPTION")
 print("=" * 60)
 print("Chargement du modèle Whisper...")
 print("  [10%] Initialisation...")
-model = load_model("base")  # "tiny", "base", "small", etc.
+model = load_model("large")  # "tiny", "base", "small", "medium", "large"
 print("  [50%] Modèle chargé")
 
 print("  [60%] Transcription en cours...")
@@ -152,45 +152,49 @@ if detected_language == "en":
         print(f"  ❌ Traduction échouée: {str(e)[:100]}")
         print("  ➜ Utilisation de la transcription originale en anglais")
 
-# 4. Résumé automatique
+# 4. Résumé avec Ollama
+import requests
+
 print("\n" + "=" * 60)
 print("ÉTAPE 4: RÉSUMÉ")
 print("=" * 60)
-print("Résumé en cours...")
-if detected_language == 'fr':
-    model_name = "t5-small"
-else:
-    model_name = "t5-small"
+print("Connexion à Ollama...")
 
-try:
-    summarizer = pipeline("summarization", model=model_name)
-except KeyError:
+def summarize_with_ollama(text, model="llama3"):
+    prompt = f"""Voici une transcription audio. Crée une fiche d'étude structurée en français avec :
+
+1. **Thème principal** : une phrase qui résume le sujet
+2. **Idées clés** : les 5-8 points essentiels à retenir (bullet points)
+3. **Concepts importants** : termes ou notions à comprendre
+4. **À retenir** : la conclusion ou message principal
+
+Sois concis et clair. Réponds uniquement avec la fiche, sans introduction.
+
+Transcription :
+{text[:6000]}"""
+
     try:
-        summarizer = pipeline("text-generation", model=model_name)
-    except KeyError:
-        summarizer = None
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={"model": model, "prompt": prompt, "stream": False},
+            timeout=120
+        )
+        response.raise_for_status()
+        return response.json().get("response", "").strip()
+    except requests.exceptions.ConnectionError:
+        print("  ❌ Ollama n'est pas lancé. Ouvre l'app Ollama et réessaie.")
+        return None
+    except Exception as e:
+        print(f"  ❌ Erreur Ollama : {e}")
+        return None
 
-# On découpe le texte si trop long (au cas où)
-chunks = [transcript[i:i+1024] for i in range(0, len(transcript), 1024)]
-summaries = []
+print("  [50%] Résumé en cours (peut prendre 1-2 minutes)...")
+final_summary = summarize_with_ollama(transcript)
 
-if summarizer:
-    for chunk in chunks:
-        try:
-            output = summarizer(chunk, max_length=150, min_length=50, do_sample=False)
-            if isinstance(output, list) and len(output) > 0:
-                summary = output[0].get('summary_text', output[0].get('generated_text', chunk[:100]))
-            else:
-                summary = str(output)[:150]
-            summaries.append(summary)
-        except Exception as e:
-            print(f"  Erreur lors du résumé d'un chunk: {e}")
-            summaries.append(chunk[:200])
-else:
-    summaries = [transcript[:200]]
+if final_summary is None:
+    final_summary = transcript[:300]
 
-final_summary = "\n\n".join(summaries)
-print("\nRésumé :\n", final_summary)
+print("\nRésumé :\n", final_summary)
 # Optionnel : supprimer le fichier audio
 os.remove(OUTPUT_WAV)
 

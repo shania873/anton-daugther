@@ -176,8 +176,14 @@ print("=" * 60)
 print("Connexion à Ollama...")
 
 def summarize_with_ollama(text, model="llama3"):
-    prompt = f"""Voici une transcription audio. Fais un résumé concis en bullet points des points importants à retenir.
-Réponds uniquement avec les bullet points, en français, sans introduction.
+    prompt = f"""Voici une transcription audio. Crée une fiche d'étude structurée en français avec :
+
+1. **Thème principal** : une phrase qui résume le sujet
+2. **Idées clés** : les 5-8 points essentiels à retenir (bullet points)
+3. **Concepts importants** : termes ou notions à comprendre
+4. **À retenir** : la conclusion ou message principal
+
+Sois concis et clair. Réponds uniquement avec la fiche, sans introduction.
 
 Transcription :
 {text[:6000]}"""
