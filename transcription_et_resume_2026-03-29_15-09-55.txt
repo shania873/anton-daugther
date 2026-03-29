@@ -1,0 +1,408 @@
+╔════════════════════════════════════════╗
+║                     TRANSCRIPTION ET RÉSUMÉ AUTOMATIQUE                      ║
+╚════════════════════════════════════════╝
+📋 Métadonnées:
+--------------------------------------------------
+  • URL: https://www.youtube.com/watch?v=XvbVePuP7NY
+  • Langue: EN
+  • Longueur: 8578 mots
+
+──────────────────────────────────────────────────
+📝 TRANSCRIPTION COMPLÈTE
+──────────────────────────────────────────────────
+    I'm done. I'm throwing Alexa in the trash. I want to create my very own fully local AI powered voice assistant. And I'm gonna go a bit crazy. First, I wanted to use AI because Alexa's kinda dumb.
+    
+    But I don't want to use AI in the cloud. I'm tired of people being all up in my business. Yeah, to hear Jeff. So I want to do everything local. In fact, I want to connect it up to my AI server, Terry, that I built in this video here.
+    
+    In fact, I wanted to answer to Terry and have the voice of Terry. This voice. I have a son. Can we do it. I don't know.
+    
+    Okay, Naboo. What year did the matrix come out. Oh. I hate you. I hate you so much.
+    
+    Okay, Naboo. What year did the matrix come out. I quit. I quit. If you do want to follow along with anything I'm doing here, here's my parts list.
+    
+    Starting with level one, basic and easy. And then here's all the stuff I have for advanced. Everything will be below. Now it turns out this is actually not that hard to do. At least at level one.
+    
+    Level three and four are kind of insane. And that's where we're going. That's kind of where Terry needs to live. And by the way, I'm showing you this journey as kind of a tutorial. So if you want to follow along and build this yourself, let's do it.
+    
+    Again, the first one's not that hard. But the last one, I think it'll be level three or four, will involve training a voice with AI, which took me way longer than I expected. And I had to rent a GPU server on Amazon. We'll get to that. Now, as I said before, I've been using Alexa for a long time.
+    
+    This is like one of the first Alexis. I think it is the first one. And by the way, I'm so sorry if I'm setting up all your stuff. Even more of a reason to go local, right. But seriously, I'm done with cloud-based stuff.
+    
+    I want to go fully local for everything. In my last video, I started that process by installing Home Assistant on a device like this, a Raspberry Pi. Home Assistant is a fully local home automation software. And it's fully free and fully awesome. So if you do want to follow this tutorial and set up your own local voice AI assistant, go watch that video and see how to set up Home Assistant because you will need that.
+    
+    Why. I'll go into that here in a moment. Now, replacing your home automation, that's actually not too bad. It's pretty easy. But replacing voice.
+    
+    Harder to do. Mainly because there's not a ton of options out there. At least not options that can meet my laundry list of what I want to do. Now, my first task was to see who has gone before me. Has someone already done this.
+    
+    The answer is kind of, and then they gave up, but now we kind of have something a little bit, but it's hard to figure out. Let me explain. I found the perfect solution. It's called Mycroft. They even had a device like Alexa.
+    
+    Take my money, but okay, it's dead. Discontinued. It was killed off by a nefarious patent troll. And even their Kickstarter backers were left empty-handed. They were supposed to receive one of their devices.
+    
+    And they looked pretty cool. I mean, look at this thing. That would have been awesome. And beyond that, there really wasn't much. I was coming up empty.
+    
+    But then for some reason, I overlooked Home Assistant. Wait, what. You mean the thing that's controlling your home. Yes. I like you thought, okay, that's just my home automation.
+    
+    Now I need a voice assistant. No. They just had their year of voice in 2023. And their goal was to implement voice control for the home. Okay, sounds pretty interesting.
+    
+    Okay, what they've done is way more than interesting. Check this out. They enabled support for an open source tool called Raspy, which I had never heard of until this moment. To fully offline, check, set a voice assistant services for things like Home Assistant. Now along with having the worst logo I've ever seen, what even is that.
+    
+    They do things like open wake word. It's just built in. And that's being able to wake up your assistant based on a voice command. Kind of important. So think, Alexa, okay, Google, Terry.
+    
+    It'll do STT or speech to text. Again, this is all running locally on your hardware. And you actually have options for what you can use. I went with using OpenAI's whisper. And no, not the cloud stuff, the locally hosted model they provide.
+    
+    And then they have the reverse because you want your voice assistant to talk back to you. And that's TTS. Again, a few options, but I fell in love with this tool called Piper. Now Raspy is not new, but what is fairly new with Home Assistant is the intent, the intent recognition. When you tell your voice assistant to do something like, hey, turn off that light, or what's the temperature of the bathroom right now.
+    
+    It needs to take what you say and figure out, okay, how do we make this a command for the system to actually do. So Home Assistant came in clutch with their thing called Assist, which allows Raspy to talk to assist and tell it to do things like turn on and off lights, turn off the internet. And that by itself is cool, but Home Assistant did one very cool thing that I didn't see an easy way to do anywhere else. You see, I wanted Raspy, which essentially is just a voice tool. It doesn't have any like smarts per se.
+    
+    It's not like AI. It's not like talking to chat GBT. So I wanted to have Raspy talk to an LLM. Similar to chat GBT, so think Olama with Lama 3. I couldn't find an easy way to do that, but Home Assistant makes that stupid easy.
+    
+    They actually have it to where an LLM, like Olama, can be the brain. And when I realized this, I went and tried it and it's kind of easy to set up. Let's set it up right now. You don't need anything special. All you need is the device you're running Home Assistant on, which I have it running on this Raspberry Pi right now.
+    
+    Again, if you don't have that set up, go watch my video. Now I'm starting from scratch so I can show you everything from the beginning. So here I have a fresh installation of Home Assistant. I'll add one device so we can play with stuff. And by one device, I mean all my Philips Hue lights.
+    
+    So lots of devices. And real quick, what we're gonna do is set up what's called a voice pipeline. It sounds way scarier than it actually is. Just a few steps. So here in Home Assistant, we'll go into settings.
+    
+    We'll click on add-ons, which will add additional functionality to our Home Assistant system. Home Assistant system, kind of a tongue twister. Then we'll go to add-on store and we're gonna add two things. We'll add whisper for our STT or speech to text. So we'll just search whisper, there it is.
+    
+    Click install. And this will actually be running whisper transcription locally on your Raspberry Pi. And if that doesn't make you excited, what does. What do you do for fun. This is what I do for fun.
+    
+    Entry coffee. Once installed, we'll click on start. So whisper takes our speech and makes it text. Now we need something that can take text and make it speech, a TTS. So we'll go back and search for one more add-on.
+    
+    It's called Piper. Piper is kind of amazing. Also kind of frustrating. You'll see why here in a second. Click on Piper, click on install.
+    
+    A little coffee break. Then we'll start that sucker. And by the way, this is all level one stuff, super easy. And then we're gonna add two more things. To go back, we'll search for assist microphone.
+    
+    This will allow us to use the microphone of our local device. And actually I have this blue Yeti microphone I'm gonna use. Here will be any microphone you want. I know it's a me error, but still. I'm gonna go ahead and plug this in.
+    
+    By the way, you don't need a microphone to do what I'm doing. Red light, we're good to go. So I'll install that. And before I start it, if I go to configuration at the top here and scroll down just a little bit until I see audio, I can choose my options for input. I'll say my blue snowball mono.
+    
+    You know, actually, I have a speaker too. I'm replacing Alexa with a speaking myth. All right, let's see if it finds that speaker. Now how about I save it, go back and see. Oh, it didn't even save my settings.
+    
+    There it is, safe. And now let's start it. And then one more add on. We're gonna add open wake word. Click on that, install.
+    
+    Again, this will enable us to be able to wake up our assistant with a command or a name. And we'll click on start. Add ons are done from here. We'll go to settings and then devices and services. And notice the auto discover two weird things, these buffaloes, actually a bunch of weird things.
+    
+    Or are they bison. I don't know. What are all these bison doing on our screen, this cattle. This is the Wyoming protocol. We'll go into this a bit more here in a moment.
+    
+    But just know for now, it's the Wyoming protocol that discovered our add ons. So whisper, piper, open wake word in our assist microphone. All we have to do right now is click on configure on each one of these. Submit, finish. Configure, submit, finish.
+    
+    Configure, submit, finish. Last one, configure, submit, finish. Now, would you believe that we're almost done with having a local voice assistant. Check this out. All we have to do now is go back to settings and then go into a special place called voice assistants.
+    
+    Now, they already have one there by default, just called home assistant. Let's edit that one. Click on that. And here we're kind of configuring our voice pipeline with the components we just added. We'll scroll down a bit until we see speech to text.
+    
+    Here we're gonna click that dropdown and we should see faster whisper. That's what we just installed for STD. And then for text to speech, we'll change home assistant cloud to piper. We also just installed that. And then for the wake word, we'll choose our wake word engine.
+    
+    We just installed that. And we'll choose our wake word. Alexa, no, we've been saying that way too much. Let's do mycroft, rest in peace and update. What should happen is I should be able to talk to this.
+    
+    I think, let's see. Okay, mycroft, how are you today. Nothing. Why isn't it working. Let's go troubleshoot.
+    
+    Make sure our configuration was good. Yeah. Let's try restarting some stuff. Okay, Naboo, how are you. That scared me.
+    
+    How are you. Sorry, I couldn't understand that. That was terrifying. All right, I've got a light behind me. Let's see if they can find that light.
+    
+    Now what's it called. Chuck lamp light. Okay, Naboo. Turn off Chuck lamp light. Sorry, I'm not aware of any device called Chuck lamp light.
+    
+    Now, first of all, that's just cool. Second, why isn't it working. I know why. Okay, Naboo. Turn off Chuck lamp light in Studio One.
+    
+    Turn off the light. Now notice, I had to be very specific and it was a bit slow. We're gonna change that in the future levels. Come on, yeah. But how cool is that.
+    
+    All running on a Raspberry Pi. That's powerful. You can also chat with it right here in your browser by going to the top right and clicking on that assist icon and saying turn back on Chuck lamp light in Studio One. Turn on Chuck lamp light in Studio One. Got it.
+    
+    Now I can't use voice right here because it's not using an HTTPS connection. Browsers block that. If you do wanna try the voice and you don't have anything to try it with, install the mobile app. They'll be able to talk back and forth. It's pretty neat.
+    
+    Hey, real quick, can I show you something awesome. Watch this. Okay, Naboo. Who is the sponsor of this video. Bitdefender is the sponsor.
+    
+    It is the best thing ever. Okay, I'll tell you how I did that here in a second but watch this. Okay, Naboo. What does Bitdefender want me to talk about. Listen, Chuck, they have a set of new features in their platform, specifically scam copilot.
+    
+    Go check your notes and stop being lazy. How cool is that. But seriously, the sponsor of today's video is Bitdefender. And yes, scam copilot is a new set of features part of their new platform and is included in their all-in-one security plans. Now, by far the coolest thing is what they can do on your phone.
+    
+    Watch this. I just installed this. First of all, I can chat with my scam copilot right here. Then it can also do this. And I had no idea this was a feature.
+    
+    If I go to finish setup for full protection, I can do SMS protection. What. So I go to my settings and I go to messages. Here in unknown and spam message filtering, I can specify Bitdefender to filter my messages for me and use the power of spam copilot. Yes, heck yeah, enable it.
+    
+    I can do calendar invite protection. That's cool. I mean, how many of you have gotten these random weird calendar invites. You're like, what is that. Probably spam.
+    
+    Okay, Naboo. Where can they learn more about scam copilot. Chuck, drink some more coffee. You already know this. They can learn more about Bitdefender and scam copilot by clicking the link in the description.
+    
+    Don't worry, it's safe. We checked it. You heard her. Now, how did I do that. And by the way, thanks to Bitdefender for sponsoring this video and being a continued sponsor of my channel.
+    
+    Please show them some love and check out their stuff below. But watch this. This is so cool and we're just scratching the surface. If I go to settings and I go to automations, this is how I did this. I created a few automations that respond to a certain voice sentence, I say voice sentence.
+    
+    So for example, the first one was new automation. The trigger is when I say something like who is the sponsor of this video and then I can have it respond with a certain response. And that's how I did all these things. Now, you can do a lot more than that, but we gotta move on. Okay, level one done.
+    
+    But here's the thing. If we're gonna replace Alexa, we gotta have more than just one, right. And it can't just be running on the home assistant device itself. We need others that we can use and connect back to this. This is where the Wyoming satellite and the Wyoming protocol come in.
+    
+    Now, the Wyoming protocol, our beloved Bison Buffalo thing, I'm not sure what that is, is a small peer-to-peer protocol for voice assistance. Now, what does that mean for us. It means that we can take a Raspberry Pi, for example. Which I'm about to do that right now with this guy right here. Ah, he's kind of wiggly.
+    
+    And we can make the Raspberry Pi a Wyoming satellite. Essentially a remote voice assistant that can communicate with and use the voice pipeline from home assistant. Now, this would be kind of level two, not too scary, but it does involve some command line. Let's get going. You might want to drink some coffee for this.
+    
+    Now, if you want to do the whole USB plug-in thing, you can. You can get a snowball and a giant speaker, and you can have that with a Raspberry Pi plug-in all around your house. You can also use something like a Raspberry Pi Zero. There's a video from this guy right here. Who shows you how to build one.
+    
+    I didn't happen to have one that I wanted to use, but I had a bunch of spare Raspberry Pies. Now, a very quick and easy way to give you a Raspberry Pi the ability to hear, or a microphone, and the ability to speak or speakers, is with this thing right here. Where'd it go. I've got one. It was in our inventory list below.
+    
+    This is the RE Speak Two-Mic Pi Hat. This little guy has two microphones on it and connectors for an external speaker. Now, I'm gonna unplug my Pi real quick and pop on this hat onto its I-O connectors. These are pretty sneak and cheap, and they do have LEDs on them so you can give a little status light for when you're talking to your assistant. So I'm gonna plug it back in here.
+    
+    Now, this is a fresh Raspberry Pi, meaning it has an SD card with a new image applied to it. I used, for my Raspberry Pi, I'll show you real quick, it's a Raspberry Pi 4 with, I'll go to Raspberry Pi Other, and it's the Raspberry Pi OS Lite 64-Bit. That's all you need. So make sure you image the SD card, pop it in, and if you need help with setting up a Raspberry Pi, I do have other videos showing you how to do that. So go ahead and launch your terminal.
+    
+    This will be the same for Mac, Windows, Linux, and get logged into your Pi. Here I'll do a pseudo-HPT update, and I'll have all these commands below. First, I'll install git and Python 3 virtual environment, just like this, and then using git, I will clone the Wyoming satellite repo from Raspy. It's actually run by Raspy. Then I'll jump into that directory, the Wyoming satellite, CD Wyoming satellite, and this next command is only for you if you're using this little hat we have, the RE speaker to mic or for mic hat.
+    
+    We're gonna recompile and install the drivers of this command. The drivers are telling our Raspberry Pi how to talk to this guy. Oh, and I forgot to mention, I've got a little bitty speaker that I'm gonna plug into our RE speak, Pi hat. It sounds like not great, but it's still pretty cool. I love how tiny it is.
+    
+    And then we'll do a pseudo reboot. We'll get logged back in when it comes back up. All right, now that we're logged back in, we're gonna CD into Wyoming satellite, and we're gonna create a Python virtual environment with Python 3-MVNV. VNV. These are super powerful.
+    
+    They help you isolate things and not step on anything else's toes. And then we'll use these few commands to upgrade PIP, which is a Python package manager installer. Then we'll use wheel to do some setup tools. Easy for me to say. And then we'll run this very long command to install all the requirements.
+    
+    Again, all commands are below. All right, now we're gonna run one command to make sure everything's working. It should give us a help file if it's good. So if you don't see this, eh, but if you do see this, you're good. Now we're gonna look at our audio devices.
+    
+    Now I have the RE speak Pi hat. I've installed drivers to make sure it can talk to the Raspberry Pi or vice versa. If you're not doing that, that's fine. Run this command, A record dash L, capital L, to see your audio devices. Find the one you're going to use.
+    
+    I'm gonna be using this one right here. But if you're plugging in some headphones or a Yeti mic, just keep that in mind. All right, now I wanna make sure everything works. I'm gonna run this test command. Again, fill in your specific mic that's gonna record something right now from this card for five seconds and save it to a test.
+    
+    wav file. Let's do that right now. I love when stuff like this becomes practical. Hey, network Chuck here. I'm gonna take a sip of coffee right now.
+    
+    Now let's play that back. With this command, A play, ready, set. Oh wait, I forgot to put my speaker in. Oh no, let's add it real quick. There we go, and play.
+    
+    I work Chuck here. I'm gonna take a sip of coffee right now. That's so fun. Okay, speakers working. The Wyoming satellite is set up.
+    
+    Let's test it real quick. We're gonna run this script, copy and paste. This is very specific to this RE speak hat. If you have something else, make sure you exchange these commands here with your device. Now what this is doing is it's gonna run the satellite on port 10, 700.
+    
+    And that's how our home assistant running over here is gonna connect to it. Let's run it right now. It is running, excellent. Now let's go set this up in home assistant. We'll go to settings, devices.
+    
+    We'll go into our configured section because we already have Wyoming configured. And find Wyoming, there it is, Wyoming protocol. Click on that, and then we'll click on add a service. Here we'll put the IP address in of our Raspberry Pi. Gosh, what was mine again, I forgot.
+    
+    And it doesn't have to be a Raspberry Pi. You could have been using another device. You can do that. And then port 10, 700. Now fingers crossed, we click submit, it found it.
+    
+    We'll leave it in default area, click on finish, it's there. Now right now, that's all we had to do. Our voice pipeline's already in place. We added this via the Wyoming protocol. It should just work.
+    
+    Okay, Naboo, how are you. I'm done. Sorry, I couldn't understand that. Yeah, I think it does get a bit weird. I'm gonna, it's like, I can't understand that.
+    
+    I'm speaking English. I'm gonna click on the dots here and say reload the satellite. Let's go watch the command line, see what's going on. Disconnect it from server, and we're back in. So now it's waiting.
+    
+    Okay, Naboo, how are you. Sorry, I couldn't understand that. Okay, it's being kind of dumb. We're gonna fix that dumb problem here in a moment with level three. Okay, Naboo, turn Chuck lamp light off.
+    
+    Turned off the light. Ah, we got it. Okay, you had to be very specific. Okay, Naboo, turn it back on. Sorry, I'm not aware of any device called it back.
+    
+    Now you see that. That's stupid and one thing we're gonna fix. You'll be able to have a conversation with it. It'll remember the context. Whoa, it's so awesome.
+    
+    So we verified it works, but now we're gonna turn this Wyoming satellite on the Raspberry Pi into a service so it runs all the time so that when you unplug it and you plug it back in, it's always gonna work. So let's stop this by doing control C and we're gonna run this command, pseudo system CTL edit force full Wyoming satellite service. We're actually creating a service on this and we're gonna paste in this config. Keep in mind, you're gonna wanna make sure you change the user. So right now it's Pi, which is incorrect for me.
+    
+    It's gotta be network Chuck. So change it to your user. It's gonna be referencing those directories. And also keep in mind, it's gonna be using the command as very specific to my Pi hat. Change it to your appropriate audio card.
+    
+    Control X, Y, enter to save. We're going to use system CTL once more to enable that service with the enable command. Now let's restart it. Oh no, she already be running. Let's do a system CTL status to make sure it's going.
+    
+    Looks good from here. Okay, Naboo. Turn Chuck lamp light on. Turned on the light. I mean, that alone is pretty cool, but not cool enough.
+    
+    We're going deeper. Now one thing I hate is that there are LED lights on this, but it's not using them. I wanna be able to know when it detects I'm talking to it. Let's enable that real quick. That's gonna be another service.
+    
+    If you're not interested in that, move on. So to get our LED with the RE speak device to work, we're on this command to install some Python libraries. And then we'll CD into the Wyoming satellite directory and the examples directory. Oh, we just got jumped into examples already here. Then we'll create another virtual environment, this time just for our lights.
+    
+    And then we'll do some basic installation stuff. So upgrading PIP, setting up wheel, the wheel, installing Wyoming 152. And then finally installing the pixel ring Python package for our LEDs. Now let's test it with this command, testing our two mic service. And if you saw the results of the help command, we're good.
+    
+    Now we're gonna create a service to run that LED program all the time. So when this command system CTL edit, that'd be the two mic LEDs service, we're gonna paste in this config, changing our username here to control X, Y, enter to save. And then we will have to edit the Wyoming service config file and add some info about those LEDs. Adding this config requires two mic LED service. So it's gonna be dependent on that.
+    
+    And then at the very end of your exact start command, you're gonna add this bit, event URI TCP 10,500, that's the port that your two mic LEDs are gonna be running on, control X, Y, enter to save. Let's enable our two mic LED service with this command and start it, changing enable to start. Let's check the status. So far so good. Looking good.
+    
+    Let's restart our Wyoming service. And yeah, we got some lights. Okay, let's test it out. It should change when I talk to it. Okay, Naboo.
+    
+    How you doing. Sorry, I couldn't understand that. All right, so now that's all we had to do. Our remote satellite is configured. Calm yourself.
+    
+    It's connected to Home Assistant and we can just take this and unplug it anywhere. We can create multiples of these. And they're all gonna be using the Wyoming protocol to talk. Now time to get more insane. I think we're on level three now.
+    
+    If we go back into Home Assistant and go to voice assistants once more, and we click on Home Assistant. You know what I don't like. First of all, this conversation agent, not smart enough for me. It's too dumb. Home Assistant doesn't know what's going on.
+    
+    I want that to be O-Lama. I want it to be a Lama three. Actually, I want it to be Lama 3. 2. A very, very smart local LLM that you can run on pretty much anything you want.
+    
+    You know what else. I want the speech to text, whisper. I want that run on other hardware as well because this Raspberry Pi right here, it's Raspberry Pi 4. Not very fast. I can actually run this whisper on another server.
+    
+    Now what I'm gonna do right now is demo running it on this laptop behind me. If you can see that, can you see it. Can't know. So I'm demoing it on this laptop but I'm ultimately gonna use Teri. I'll do the same thing for Piper too.
+    
+    I'm gonna offload everything that's AI intensive to another server. Let's get to work. Okay, here in my laptop, I'm going to install O-Lama. So I'm gonna go to the internet. Find O-Lama, O-Lama.
+    
+    com. Go to download and what I'm showing you here will work for everything. Click on Windows, download. Did it download. Oh yeah, downloading up there.
+    
+    We'll run the setup. Now, obviously if you've got Mac or Linux, click on those. The installation's actually easier than this. Now what O-Lama allows us to do is run local LLMs or local versions of chat GPT except they don't touch the cloud. No internet, they're amazing.
+    
+    Perfect for new Teri coming up soon. Okay, it says O-Lama is running. Click here to get started. Aha, and look, it gave us the exact command I want to run. O-Lama run LLama32.
+    
+    My favorite model right now. So we'll run that command right now. It's gonna download LLama32 and it's gonna run it real quick. I see quick, I mean like a minute. Okay, it's running.
+    
+    We can do a little test like, hey, and I don't want any assistance. So I'm going to do buy, is it buy. Yes, buy. Okay, it's running now. We can actually test that by going to our web browser, typing in local hosts and then port 11434.
+    
+    Awesome, O-Lama's running. That's how Home Assistant's gonna connect to us or the O-Lama server. So now we're gonna go back to Home Assistant. We'll go to settings and then we'll go to devices and services and then we're gonna click on at the bottom right, add an integration because the new integration we're gonna add is O-Lama. It's official, it's supported, it's awesome.
+    
+    Click on that and then search for O-Lama. There it is. Click on that and it'll put in the IP address of our laptop which mine was 10. 70. 7.
+    
+    Or no, 10. 70. 2. 104 and it'll put the port in of 114. Ah, I can't type today.
+    
+    11434. Fingers crossed. Why. Okay, I think my Windows firewall is on. Let's go turn it off.
+    
+    That will definitely block stuff. Oh, it's turned off. Okay, I know what it is. O-Lama by default runs on 127001. We need that to be 000.
+    
+    On all interfaces, not just our loop back port to allow connections from the outside. So annoying. You probably won't have this issue on Mac or Linux. I'm gonna quit O-Lama by O-Lama. We'll search for environment variables and we'll say edit these system environment variables and then click on environment variables.
+    
+    Down here under system variables, we'll create a new one called O-Lama underscore host and the value will be 0. 0. 0. 0. And that's it.
+    
+    Now let's launch O-Lama again. O-Lama, it should start running. Let's check it in our browser. It's up and now let's add it to Home Assistant. Man, I hate that little detail we had to make.
+    
+    11434. Ready, set, stinking, yes. Oh, all right, let's choose our model. I'm gonna use 3. 2, the one we downloaded and click submit.
+    
+    Ah, it's there. So now how do we use it with our voice pipeline. Let's go to settings. This is gonna be fun. Go to voice assistants, jump into Home Assistant and under conversation agent, we're gonna change it from Home Assistant to Lama 3.
+    
+    2. Now one thing we do have to do, if you wanted to have access to our stuff in our home, we'll have to click on that gear and then go from no control to assist to give it access. You can also kind of tell it who it is. Actually, I like to add because it might not answer you. It might not answer questions you ask.
+    
+    You say you can also answer any other question. You have options here, but we're gonna ignore that for now. Click on submit, finish and update. So now we're using O-Lama. This is, this is so fun.
+    
+    Check this out. We'll go to our laptop and launch task manager so we can see our GPU go crazy when we ask it questions. Okay, here we go. Okay, Naboo. Who was the first president of the United States.
+    
+    There it goes. It's using it. The first president of the United States was George Washington. He served from 1789 to 1797 and is often referred to as the father of our country. Yeah, did you see that spike.
+    
+    What was really cool was the context. Okay, Naboo. Turn off the light, Chuck lamp. I have successfully turned off the light in Studio One. Okay, cool.
+    
+    Now let's see if it keeps the context. This is what we could not do before. Okay, Naboo. Turn it back on. Yes.
+    
+    I was able to turn on the light Chuck lamp. Okay, perfect. Okay, so now we're using a local LLM hosted on my laptop back here, but honestly, things are a bit slow. I don't like that. So the next phase, the next level in our plan, our mission, we're going deeper.
+    
+    We're gonna try and host more and more of that voice pipeline off of the little Raspberry Pi. Like, no, it's this guy. This Raspberry Pi onto more beefier hardware. Like my laptop here. Let's go to our voice pipeline real quick.
+    
+    Back here in Home Assistant, we'll go to Settings. We'll go to a voice assistance and click on Home Assistant. The first thing is our speech to text, faster whisper. I wanna offload that and host it on that laptop. Let's do that right now.
+    
+    Here on my Windows laptop, I'm gonna launch terminal. And this will be a Linux based thing. It's gonna be actually a Docker container. So if you're running Mac or Linux, you're good to go. If you're running Windows, you'll just need to do some WSL2 magic.
+    
+    I feel like, Chuck, I don't know what that is. I've got a video right here. Check it out. I'm gonna launch a fresh WSL instance. On install Ubuntu 2204.
+    
+    Create some new login stuff. And we'll do a pseudo APT update. Two update repositories. If I put my password in right, I always mess that up. And then let's make sure we have Docker installed.
+    
+    We'll do a little pseudo APT install. Docker. io. And then right after that, type in Docker compose. Cause we'll be using that.
+    
+    Compose is amazing. You're like, Chuck, I don't know what that is. I've got a video on that too, right here. We'll do a dash Y at the end and install all that. And actually I lie, we're not gonna use compose, but hey, we have it installed.
+    
+    Now real quick, we're gonna make one directory. MKDAR, we'll call it whisper data. Just like that. Now with one command, we're gonna launch a container called y-ohming whisper. This is also run by the raspy open source company.
+    
+    And we're gonna change one thing. That's the path. Because we're doing a volume mapping here in Docker, we need to change the path to that folder we just made. So I'm gonna take all that out and just put in tilde forward slash whisper data. That should do it.
+    
+    Oh, and we gotta do pseudo Docker run. Ready, set, fingers crossed, let's go. It's gonna download that image. And notice this is y-ohming whisper, not just whisper. It's whisper with the Wyoming protocol built in.
+    
+    And it's running. CC right here, info main ready. Now we need to add this to home assistant. And because we're running the Wyoming protocol, it's gonna be so easy to watch this. It's ridiculous.
+    
+    Here at home assistant, we'll go to settings. We'll go to devices and services. And it will scroll down until we see our Wyoming protocol right here. And before we do anything, I do want to rename our old whisper because it might get a little confusing. Yours might be called faster whisper if you just did this in a similar way that I did.
+    
+    But we can click on the dots here, click on rename, call it whisper underscore old. And then we'll actually click on the one entity and the faster whisper here. And we'll change that name too. Go to the gear and change the name up here to faster whisper old. If there's nothing there, just put faster whisper old update.
+    
+    Now we can click on add service. Here we're gonna put the IP address in similar to what we did with Olama. The IP address of our machine. Gosh, I forgot it stinking again. 1072104, need to get that tattooed.
+    
+    And the port was 103100, right. Yes, 103 or 10300. I'm losing my mind. Fingers crossed, click submit, success. We got it.
+    
+    Now, all we have to do is go to settings, go to voice assistants, jump into our home assistant, and then scroll down to speech to text and change that from faster whisper old to faster whisper. That's our new thing. And click on update. Now your Wyoming satellite or whatever you have may do something fun here real quick. It'll refresh, go red and blink and it's back.
+    
+    Now let's see what happens. Okay, Naboo. What year did the movie The Matrix come out. The movie The Matrix was released in 1999. That was pretty fast.
+    
+    I gotta do a comparison. Let's change it back. Okay, Naboo. What year did the movie The Matrix come out. The movie The Matrix was released in 1999.
+    
+    Pretty slow. Now just so you know, I'm not sure I mentioned this earlier in the video. You don't need any special device to be able to use your voice assistant that we're creating now. You can actually use the home assistant app, which is free, like everything, free and open source. And you can just click the dots at the top right, go to assist and have a conversation.
+    
+    What year did the movie Gone With The Wind come out. Yep, there it is, using my stuff. I couldn't find any information on a movie called Gone With A Wind. Could you please provide more context or check if the movie title is correct. Forget about that.
+    
+    Tell me how many movies Tom Cruise has been in. Now, the playback is slow. Tom Cruise has appeared in over 50 films throughout his career, including Top Gun. 50 films. Okay, so that's our next task, actually.
+    
+    We've offloaded these speech to text. Now let's offload the text to speech, the TTS. Actually, before we do that, let's close this Docker container and let's run it as a daemon. So over here, we'll do run-itd. That way it's gonna run all the time and it's not gonna be just sitting here.
+    
+    Could do a pseudo Docker PS, there it is. Oh, and by the way, this container right now is not using our GPU. Now this laptop does have a 3080, a notebook quality 3080, but it's not using the GPU. It is possible to get the GPU to work with this Docker container, but I'll tell you one thing, it's not stinking easy. I tried for hours and hours and hours.
+    
+    I finally got it to work on Terry, but I could not get it to work on him. Honestly, I'm not sure it's that worth it, but if you're crazy like me, you'll push through. But no GPU is really easy. I'll show you how Terry does in a second. Now let's get rid of Piper on the Home Assistant device.
+    
+    Let's offload that, text to speech. So we'll get back to our laptop and again, Windows, Mac, Linux. This'll all work on everything. This will be another, yet another Docker container. We'll create one more directory, mkdir, we'll call it PiperData, and then we'll paste in this command, another Docker run command, and we'll change one thing just as we did before, the path to our PiperData.
+    
+    Excellent. Now we're gonna run it interactively to make sure it's working. Ready, set, go. It's gonna pull down the, oh wait, we've got pseudo. Sudo is gonna pull down the Docker container and it's ready.
+    
+    Now, next step, let's add that to our Home Assistant. Our voice pipeline. What port was that again. Port 10, 200. So we'll go back to settings, devices.
+    
+    We've been here before. Go to Wyoming protocol. And just like we did before, let's rename Piper so we don't get confused, because it will use the exact same name. We'll say Piper old, and we'll jump into the entity and rename that as well. And update.
+    
+    All right, let's get back, add a service. Put in the IP address of our server. I think I remember it this time, 104, got it. And then our port 10, 200. Ready, set, fingers crossed, go.
+    
+    Piper was found. Awesome. Click on finish. Now let's add that to our voice pipeline. Go to settings, voice assistance, Home Assistant.
+    
+    Scroll down just a little bit until we see text to speech. We'll go from Piper old to Piper, our new one. And click on update. I'm so curious to see if this is any faster. We'll let that refresh.
+    
+    Done. And let's see if it actually works. Okay, Naboo. What year did Bill Gates create his computer. Bill Gates co-created the first successful version of the operating system MSDOS in 1981 and his first commercially successful software product, basic for Microsoft, was released in 1975.
+    
+    Okay, Naboo. How long after that did Steve Jobs make his. I couldn't find any information on a computer created by Steve Jobs. However, I can tell you that Steve Jobs co-founded Apple Inc. in 1976 with Steve Wozniak and Ronald Wayne.
+    
+    And he played a key role in the development of the Macintosh computer in the 1980s. Okay, now that's just awesome. We've offloaded pretty much our entire, actually no, we offloaded everything, our entire voice pipeline onto our computer here. It's no longer running on Home Assistant. And similar to the Wyoming Whisperer, the Wyoming Piper container can be run with the GPU.
+    
+    I'm just not gonna show you how to do that because there are too many individual things. I would never be able to show you it. And it probably would never work for you. I'm just telling you, if I showed it to you, you have to dig into it yourself. CPU actually works pretty good.
+    
+    Now let me show you Terry. I'm gonna add Terry to this. I'll simply add that in my Wyoming protocol, putting in Terry's IP address, faster whisperer and Piper. And tell you what, let's add his chat GP2 as well through Olama. So it's all running on Terry.
+    
+    And yes, you can add more than one LLM from various servers or the same server if you want. I'll just pick one of my LLMs here. Actually, I need to rename this so I don't get confused. We'll do LLM 3. 2, done.
+    
+    Let's go adjust our voice pipeline. I think it's all Terry right now. Yep, click on update. Okay, Naboo. How many Batman movies are there.
+    
+    I don't have a specific answer to your question about the number of Batman movies. Could you please specify which movies or area you are referring to. Is it the DC Extended Universe, DCU or the previous films based on the comics. Oh wait, I didn't give it to Terry. I gave the LLM to Terry.
+    
+    Update, I totally did not do that. Okay, let's try it again. Okay, Naboo. How many total Batman movies are there across all the universes. There are numerous Batman films, including one, DC Extended Universe, DCU, Asterisk Batman V Superman, Dawn of Justice, 2016 Asterisk, Justice League, animated film Asterisk Batman, and Mr.
+    
+    Please Sub-Zero, 19, and the MTA animated film Asterisk Batman, Listen to me. The story of the Batman 2003 animated film Harley Quinn, 2020 Wildman, I asked the wrong question. It's listening to all the Batman movies. The various universes and mediums. Here is the revised list one, DC Extended Universe, DCU, Asterisk Batsterisk 2000.
+    
+    I'm just gonna unplug that. That was funny. Oh boy, let's plug that back in. Okay, here's the state of things. We've gone pretty far.
+    
+    We now have a voice assistant that's using some serious hardware, Terry, my AI server, for all of its processing from speech to text, text to speech, and it's using the local LLM, Lama 3. 2, and it can control my stinking house. Okay, Naboo, turn off Chuck Lamp. The Chuck Lamp has been turned off. It's pretty stinking fast.
+    
+    Okay, Naboo, turn it back on. The Chuck Lamp in Studio One has been turned on. Do a short flash on Chuck Lamp. The Chuck Lamp in Studio One is now flashing. No, it's not.
+    
+    Do a short flash on Chuck Lamp. The Chuck Lamp in Studio One is now flashing briefly. No, it's not. Okay, so here's the state of voice assistants. Hosting it yourself.
+    
+    It's okay. Like, I think it's enough for me to make the move. There are still some things that I think Alexa is very good at, but it can't do AI yet, which is pretty compelling for me to host my AI locally and have it talk to me on a voice assistant that I can deploy many of throughout my house. That's powerful. Now, you may be thinking, what about a screen.
+    
+    Alexa has screens. This doesn't have a screen. Hold on. Like I said, you can do pretty much whatever hardware you want to create a Wyoming satellite. One of those is this.
+    
+    This little guy here. Yes, it does have a screen. This is the ESP32 S3 box. It's created by ExpressIF, the people who make the ESP32 S3. And this is a specialized one that has a screen and it's designed to be a voice assistant.
+    
+    Now the S3 box is really cool. Screen's kind of small. Speaker's kind of sucky, but it's neat. I might end up buying more. You can actually set timers similar to Alexa, which this thing currently doesn't do.
+    
+    So far, yes, it is missing some stuff from Alexa, but I had so much fun doing this and I love that it's all local. I don't even care. I'll live with it. And so will my family. They'll have to.
+    
+    Cause I'm going to replace Alexa. Now there's two things that I'm actually missing right now that I want to try and do. It doesn't answer to Terry or he doesn't answer to Terry. That teaching Terry his name is actually pretty easy. I got a link below in the documentation and home assistant walks us through creating our own wake word.
+    
+    And what we're going to start is right here, opening this link to a wake word training environment. This is using Google Colab. You'll be using their data center to train a new word, which is kind of funny when you think about it. Like for me, I thought, okay, I'll just type in a new word and it will just recognize it. But no, you have to train an AI model to be able to recognize the sounds of Terry.
+    
+    And this will be fairly quick. The first thing we'll do is enter our wake word right here. Now let's just try Terry and then click this play button on the left. And it's done. Now we're going to scroll down a bit and click on this play icon down here and see if it sounds right.
+    
+    Terry, Terry. Terry, what. So you may want to do some phonetic spelling. So I'll go back up here and change it to Terry. Let's try that.
+    
+    Let's see how it sounds. Terry, Terry. Better. Once you're happy with that, go to the top and click on runtime in the menu. And then run all ready, set, go.
+    
+    This might take a minute. So get some coffee. Right now it's using machine learning to train a new wake word for your voice assistant. When it does finish, you should see two files downloaded automatically, a TF Lite file and an Onyx file. This is what will upload a home assistant to give it a voice.
+    
+    Here in Home Assistant, we'll need one add-on to make this work. So we'll go to settings and then click on add-ons. And then we'll click on the add in store down here or add on store. And we'll search for Samba. There it is.
+    
+    What this will do is allow us to connect to Home Assistant's file system and upload files. So we'll click on that and then click on install. Give it a second, little coffee break. And then before we start this, we'll go to configuration at the top here. Just click on that and we'll set a password.
+    
+    And then scroll down a little bit and click save. Then get back over to info and click on start. Now how you connect to Home Assistant using Samba will vary depending on the operating system you have. For me, I'm rocking Windows. I'll show you that real quick.
+    
+    So first we'll take note of the IP address. Mine is 192. 168. 083. So from here, I'm gonna launch my Windows Explorer and then we'll have documentation below for the other operating systems.
+    
+    And then right here at my, I guess it's the address bar, right at the address bar, click in there and we'll type in backslash, backslash, our IP address, backslash share. It should pop up and say, hey, log in. Put in the username, Home Assistant. And the password we just set. And go, awesome, we're in.
+    
+    Now here we're gonna create one directory. We'll right click and say new folder, folder directory, same kind of thing. And we'll name it open wake word, just like that. We'll jump in there and then we'll drag our two files, our TF Lite and our Onyx file right in there. Done.
+    
+    Now getting back to Home Assistant, we'll go to settings, voice assistant, jump into our voice assistant and scroll down until we see open wake word. We'll change it from okay, Naboo to, there's a new one right there, Terry. Can't help with that. I just realized I said it. It's so funny, to Terry and update.
+    
+    Fingers crossed, this should give Terry a new name. Terry, it already worked. The living room lights have been turned off. Would you like to turn on the lights in a specific area. No, Terry, what year did the Matrix come out.
+    
+    The Matrix film was released in 1999. However, the movie's storyline and main release date is also subject to multiple variations as it includes different Matrix versions or chapters. Terry has a name. Also, I don't like the voice it has. I want my own custom voice to be Terry, this Terry.
+    
+    Ah. Now I tried to make that happen in this video. I couldn't figure it out. I spent hours, I spent a whole day just trouble shooting it at nights and I ignored everybody and I couldn't do it. But I'm gonna do it in the next video.
+    
+    I don't care how much coffee it takes, I'm going to do it.
+
+──────────────────────────────────────────────────
+✨ RÉSUMÉ
+──────────────────────────────────────────────────
+    L'utilisateur de la transcription est frustré avec Alexa et souhaite créer son propre assistant vocal alimenté par l'IA, entièrement local et déconnecté du cloud pour protéger sa vie privée. Il a une liste de pièces détachées pour construire cet appareil en trois niveaux de difficulté croissante, avec le niveau 3 ou 4 impliquant la formation d'une voix avec l'IA. L'utilisateur a utilisé Alexa depuis longtemps mais est fatigué des services basés sur le cloud et veut tout mettre en local. Dans sa dernière vidéo, il a installé Home Assistant sur un Raspberry Pi pour commencer à automatiser son domicile. Cependant, remplacer la voix est plus difficile que remplacer l'automatisation domestique car il n'y a pas beaucoup d'options disponibles.
+    
+    Après avoir cherché des solutions existantes, l'utilisateur a trouvé Mycroft, mais il a été mis hors service par un patents troll et ses partisans Kickstarter ont été laissés sans device. Après cela, il a découvert Home Assistant qui a une fonctionnalité de reconnaissance vocale locale et prend en charge un outil open source appelé Raspy. Raspy offre des fonctionnalités telles que l'éveil vocal, la reconnaissance de la parole (STT) avec OpenAI Whisper et la synthèse vocale (TTS). Il permet également à Raspy de communiquer avec Home Assistant via Assist pour effectuer des tâches domestiques. L'utilisateur peut également connecter un grand modèle linguistique (LLM) comme Olama avec Lama 3 pour donner une intelligence plus avancée à son assistant vocal.
+    
+    Pour commencer, l'utilisateur montre comment installer Home Assistant sur un Raspberry Pi et ajouter un appareil pour jouer avec les fonctionnalités. Il souligne que si vous n'avez pas encore installé Home Assistant, vous pouvez regarder sa vidéo précédente pour apprendre à le faire.
+
+══════════════════════════════════════════════════

@@ -14,7 +14,7 @@ from transformers import pipeline
 import yt_dlp
 
 # === Paramètres ===
-VIDEO_URL = "https://www.youtube.com/watch?v=SaHHgzoXceU&t=231s"   # <-- Remplace par ton lien
+VIDEO_URL = "https://www.youtube.com/watch?v=XvbVePuP7NY"   # <-- Remplace par ton lien
 
 # === 1. Télécharger l'audio YouTube ===
 print("Téléchargement de la vidéo...")
@@ -42,7 +42,7 @@ print("ÉTAPE 2: TRANSCRIPTION")
 print("=" * 60)
 print("Chargement du modèle Whisper...")
 print("  [10%] Initialisation...")
-model = whisper.load_model("large")   # 'tiny', 'base', 'small', 'medium', 'large'
+model = whisper.load_model("small")   # 'tiny', 'base', 'small', 'medium', 'large'
 print("  [50%] Modèle chargé")
 
 print("  [60%] Transcription en cours... (ça peut prendre quelques minutes)")
@@ -53,118 +53,7 @@ detected_language = result.get("language", "unknown")
 print("  [100%] ✅ Transcription terminée")
 print(f"\n📝 Langue détectée: {detected_language.upper()}")
 
-# === 2.5 AMÉLIORATION DE LA TRANSCRIPTION ===
-print("\n" + "=" * 60)
-print("ÉTAPE 2.5: AMÉLIORATION DU TEXTE")
-print("=" * 60)
-print("Formatage et correction en cours...")
-print("  [10%] Initialisation...")
-
-try:
-    # Charger le modèle de ponctuation
-    print("  [30%] Chargement du modèle de ponctuation...")
-    punct_model = pipeline("text2text-generation", model="oliverguhr/fullstop-punctuation-multilingual-sobert")
-    
-    # Découper en chunks et appliquer la ponctuation
-    chunks = [full_text[i:i+300] for i in range(0, len(full_text), 300)]
-    corrected_chunks = []
-    
-    for i, chunk in enumerate(chunks):
-        pct = 40 + int((i / len(chunks)) * 40)
-        print(f"  [{pct}%] Correction chunk {i+1}/{len(chunks)}")
-        try:
-            # Appliquer la ponctuation
-            result = punct_model(chunk, max_length=512, num_beams=2, do_sample=False)
-            corrected_text = result[0]['generated_text']
-            corrected_chunks.append(corrected_text)
-        except Exception as e:
-            print(f"    ⚠️  Erreur: {str(e)[:50]}")
-            # Fallback: application basique de majuscules et ponctuation
-            corrected = chunk.strip()
-            if corrected and not corrected.endswith(('.', '!', '?')):
-                corrected += '.'
-            corrected_chunks.append(corrected)
-    
-    full_text = " ".join(corrected_chunks).strip()
-    
-    # Appliquer des améliorations basiques
-    # Capitaliser le début des phrases
-    sentences = full_text.replace('? ', '?\\n').replace('! ', '!\\n').replace('. ', '.\\n').split('\\n')
-    sentences = [s.strip() for s in sentences if s.strip()]
-    formatted_sentences = []
-    for sent in sentences:
-        if sent:
-            # Capitaliser la première lettre
-            sent = sent[0].upper() + sent[1:] if len(sent) > 1 else sent.upper()
-            formatted_sentences.append(sent)
-    
-    full_text = " ".join(formatted_sentences)
-    
-    print("  [90%] Finalisation...")
-    print("  [100%] ✅ Texte amélioré")
-    print("\n📝 Transcription améliorée (extrait) :", full_text[:500])
-except Exception as e:
-    print(f"  ⚠️  Amélioration échouée: {str(e)[:100]}")
-    print("  ➜ Utilisation de la transcription originale")
-
-# === 3. TRADUCTION (si anglais) ===
-if detected_language == "en":
-    print("\n" + "=" * 60)
-    print("ÉTAPE 3: TRADUCTION ANGLAIS → FRANÇAIS")
-    print("=" * 60)
-    print("Traduction en cours...")
-    print("  [10%] Chargement du modèle de traduction...")
-    try:
-        # Essayer d'abord Helsinki-NLP
-        try:
-            translator = pipeline("translation_en_to_fr", model="Helsinki-NLP/opus-mt-en-fr")
-            print("  [20%] Modèle Helsinki-NLP chargé")
-        except Exception as e1:
-            print(f"  ⚠️  Helsinki-NLP échoue: {str(e1)[:80]}")
-            print("  [20%] Essai alternative...")
-            from transformers import MarianMTModel, MarianTokenizer
-            model_name = "Helsinki-NLP/opus-mt-en-fr"
-            tokenizer = MarianTokenizer.from_pretrained(model_name)
-            model = MarianMTModel.from_pretrained(model_name)
-            print("  [20%] Modèle alternatif chargé")
-            translator = None
-        
-        print("  [30%] Modèle chargé")
-        
-        # Découper le texte en chunks (max 512 chars pour le modèle)
-        chunks = [full_text[i:i+512] for i in range(0, len(full_text), 512)]
-        translated_chunks = []
-        
-        for i, chunk in enumerate(chunks):
-            pct = 30 + int((i / len(chunks)) * 60)
-            print(f"  [{pct}%] Traduction chunk {i+1}/{len(chunks)}")
-            try:
-                if translator:
-                    result_translation = translator(chunk, max_length=512)
-                    if isinstance(result_translation, list) and len(result_translation) > 0:
-                        translated_text = result_translation[0].get('translation_text', chunk)
-                    else:
-                        translated_text = chunk
-                else:
-                    # Utiliser pipeline manuel
-                    inputs = tokenizer(chunk, return_tensors="pt", max_length=512, truncation=True)
-                    translated = model.generate(**inputs)
-                    translated_text = tokenizer.decode(translated[0], skip_special_tokens=True)
-                
-                translated_chunks.append(translated_text)
-            except Exception as e:
-                print(f"    ⚠️  Erreur chunk {i+1}: {str(e)[:60]}")
-                translated_chunks.append(chunk)
-        
-        full_text = " ".join(translated_chunks)
-        print("  [90%] Finalisation...")
-        print("  [100%] ✅ Traduction terminée")
-        print("\n📝 Transcription traduite (extrait) :", full_text[:500])
-    except Exception as e:
-        print(f"  ❌ Traduction échouée: {str(e)[:100]}")
-        print("  ➜ Utilisation de la transcription originale en anglais")
-else:
-    print("\n📝 Transcription (extrait) :", full_text[:500])
+print("\n📝 Transcription (extrait) :", full_text[:500])
 
 # === 4. Résumé avec Ollama (llama3) ===
 import requests
@@ -175,8 +64,9 @@ print("ÉTAPE 4: RÉSUMÉ")
 print("=" * 60)
 print("Connexion à Ollama...")
 
-def summarize_with_ollama(text, model="llama3"):
-    prompt = f"""Voici une transcription audio. Crée une fiche d'étude structurée en français avec :
+def summarize_with_ollama(text, mode="points", model="mistral-nemo"):
+    if mode == "points":
+        prompt = f"""Voici une transcription audio (peut être en français ou en anglais). Crée une fiche d'étude structurée en FRANÇAIS avec :
 
 1. **Thème principal** : une phrase qui résume le sujet
 2. **Idées clés** : les 5-8 points essentiels à retenir (bullet points)
@@ -184,6 +74,11 @@ def summarize_with_ollama(text, model="llama3"):
 4. **À retenir** : la conclusion ou message principal
 
 Sois concis et clair. Réponds uniquement avec la fiche, sans introduction.
+
+Transcription :
+{text[:6000]}"""
+    else:
+        prompt = f"""Voici une transcription audio (peut être en français ou en anglais). Écris un résumé complet et fluide en FRANÇAIS, en paragraphes. Couvre toutes les idées importantes dans l'ordre. Réponds uniquement avec le résumé, sans introduction.
 
 Transcription :
 {text[:6000]}"""
@@ -203,8 +98,15 @@ Transcription :
         print(f"  ❌ Erreur Ollama : {e}")
         return None
 
+print("\nQuel type de résumé veux-tu ?")
+print("  1 - Fiche par points (thème, idées clés, concepts, à retenir)")
+print("  2 - Résumé complet en paragraphes")
+choix = input("Ton choix (1 ou 2) : ").strip()
+mode_resume = "complet" if choix == "2" else "points"
+print(f"  ➜ Mode choisi : {'résumé complet' if mode_resume == 'complet' else 'fiche par points'}")
+
 print("  [50%] Résumé en cours (peut prendre 1-2 minutes)...")
-final_summary = summarize_with_ollama(full_text, model="llama3")
+final_summary = summarize_with_ollama(full_text, mode=mode_resume, model="mistral-nemo")
 
 if final_summary is None:
     final_summary = full_text[:300]
@@ -212,78 +114,119 @@ if final_summary is None:
 print("  [90%] Traitement du résumé final...")
 
 # === FONCTION POUR FORMATER LE TEXTE EN PARAGRAPHES ===
-def format_text_into_paragraphs(text, width=100):
-    """Formate le texte en paragraphes lisibles avec sauts de ligne appropriés."""
+def format_text_into_paragraphs(text, sentences_per_para=5):
+    sentences = []
+    for s in text.replace('!', '.').replace('?', '.').split('.'):
+        s = s.strip()
+        if s:
+            sentences.append(s + '.')
     paragraphs = []
-    
-    # Diviser en phrases
-    sentences = text.replace('.', '.\n').replace('!', '!\n').replace('?', '?\n').split('\n')
-    current_para = []
-    current_length = 0
-    
-    for i, sent in enumerate(sentences):
-        sent = sent.strip()
-        if not sent:
-            if current_para:
-                paragraphs.append(' '.join(current_para))
-                current_para = []
-                current_length = 0
-            continue
-        
-        sent_with_space = sent + ' ' if i < len(sentences) - 1 else sent
-        
-        if current_length + len(sent_with_space) > width and current_para:
-            paragraphs.append(' '.join(current_para))
-            current_para = [sent]
-            current_length = len(sent)
-        else:
-            current_para.append(sent)
-            current_length += len(sent_with_space)
-    
-    if current_para:
-        paragraphs.append(' '.join(current_para))
-    
-    return '\n'.join(paragraphs)
+    for i in range(0, len(sentences), sentences_per_para):
+        paragraphs.append(' '.join(sentences[i:i+sentences_per_para]))
+    return '\n\n'.join(paragraphs)
 
 # === 5. Sauvegarder transcription + résumé dans un fichier texte ===
 print("\n" + "=" * 60)
 print("ÉTAPE 5: SAUVEGARDE")
 print("=" * 60)
 print("Sauvegarde en cours...")
-output_file = "transcription_et_resume.txt"
+from datetime import datetime
+output_file = f"transcription_et_resume_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.txt"
 
 # Formater les textes en paragraphes
 formatted_text = format_text_into_paragraphs(full_text)
 formatted_summary = format_text_into_paragraphs(final_summary)
 
 with open(output_file, 'w', encoding='utf-8') as f:
-    f.write("╔" + "═" * 78 + "╗\n")
+    f.write("╔" + "═" * 40 + "╗\n")
     f.write("║" + " TRANSCRIPTION ET RÉSUMÉ AUTOMATIQUE ".center(78) + "║\n")
-    f.write("╚" + "═" * 78 + "╝\n")
+    f.write("╚" + "═" * 40 + "╝\n")
     
     f.write("📋 Métadonnées:\n")
-    f.write("-" * 80 + "\n")
+    f.write("-" * 50 + "\n")
     f.write(f"  • URL: {VIDEO_URL}\n")
     f.write(f"  • Langue: {detected_language.upper()}\n")
     f.write(f"  • Longueur: {len(full_text.split())} mots\n")
     
-    f.write("\n" + "─" * 80 + "\n")
+    f.write("\n" + "─" * 50 + "\n")
     f.write("📝 TRANSCRIPTION COMPLÈTE\n")
-    f.write("─" * 80 + "\n")
+    f.write("─" * 50 + "\n")
     # Ajouter indentation aux paragraphes
     for para in formatted_text.split('\n'):
         f.write("    " + para + "\n")
     
-    f.write("\n" + "─" * 80 + "\n")
+    f.write("\n" + "─" * 50 + "\n")
     f.write("✨ RÉSUMÉ\n")
-    f.write("─" * 80 + "\n")
+    f.write("─" * 50 + "\n")
     # Ajouter indentation aux paragraphes du résumé
     for para in formatted_summary.split('\n'):
         f.write("    " + para + "\n")
     
-    f.write("\n" + "═" * 80 + "\n")
+    f.write("\n" + "═" * 50 + "\n")
 
 print(f"[100%] ✅ Fichier sauvegardé: {output_file}")
+
+# === 6. Envoyer le résumé dans Apple Notes ===
+import subprocess
+
+def markdown_vers_html(texte):
+    import re
+    lignes = texte.split('\n')
+    html = []
+    in_list = False
+    for ligne in lignes:
+        # Titres
+        if ligne.startswith('### '):
+            if in_list: html.append('</ul>'); in_list = False
+            html.append(f'<h3>{ligne[4:].strip()}</h3>')
+        elif ligne.startswith('## '):
+            if in_list: html.append('</ul>'); in_list = False
+            html.append(f'<h2>{ligne[3:].strip()}</h2>')
+        elif ligne.startswith('# '):
+            if in_list: html.append('</ul>'); in_list = False
+            html.append(f'<h1>{ligne[2:].strip()}</h1>')
+        # Listes (- ou * ou •)
+        elif re.match(r'^[-*•]\s+', ligne):
+            if not in_list: html.append('<ul>'); in_list = True
+            contenu_item = re.sub(r'^[-*•]\s+', '', ligne)
+            contenu_item = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', contenu_item)
+            html.append(f'<li>{contenu_item}</li>')
+        # Listes numérotées
+        elif re.match(r'^\d+\.\s+', ligne):
+            if not in_list: html.append('<ul>'); in_list = True
+            contenu_item = re.sub(r'^\d+\.\s+', '', ligne)
+            contenu_item = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', contenu_item)
+            html.append(f'<li>{contenu_item}</li>')
+        # Ligne vide
+        elif ligne.strip() == '':
+            if in_list: html.append('</ul>'); in_list = False
+            html.append('<br>')
+        # Texte normal
+        else:
+            if in_list: html.append('</ul>'); in_list = False
+            ligne = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', ligne)
+            html.append(f'<p>{ligne}</p>')
+    if in_list:
+        html.append('</ul>')
+    return '\n'.join(html)
+
+def envoyer_dans_notes(titre, contenu):
+    contenu_html = markdown_vers_html(contenu)
+    # Échapper les guillemets et antislashes pour AppleScript
+    contenu_safe = contenu_html.replace('\\', '\\\\').replace('"', '\\"').replace('\r', '')
+    script = f'tell application "Notes" to make new note at folder "Notes" with properties {{name:"{titre}", body:"{contenu_safe}"}}'
+    try:
+        subprocess.run(["osascript", "-e", script], check=True)
+        print("✅ Note créée dans Apple Notes !")
+    except Exception as e:
+        print(f"⚠️  Impossible de créer la note : {e}")
+
+print("\n" + "=" * 60)
+print("ÉTAPE 6: APPLE NOTES")
+print("=" * 60)
+note_titre = f"Résumé - {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+envoyer_dans_notes(note_titre, final_summary)
+
 
 print("\n" + "=" * 60)
 print("✅ TRAITEMENT TERMINÉ AVEC SUCCÈS!")
