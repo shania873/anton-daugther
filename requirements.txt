@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+python-multipart
+python-dotenv
+certifi
+requests
+openai-whisper
+yt-dlp

@@ -9,6 +9,9 @@
 *.mp3
 *.m4a
 
+# Postman collection (contient le token)
+*.postman_collection.json
+
 # Generated files
 transcription_et_resume.txt
 enregistrement_et_resume.txt
