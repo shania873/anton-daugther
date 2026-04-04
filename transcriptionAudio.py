@@ -197,21 +197,116 @@ def markdown_vers_html(texte):
         html.append('</ul>')
     return '\n'.join(html)
 
-def envoyer_dans_notes(titre, contenu):
-    contenu_html = markdown_vers_html(contenu)
+PARA_DOSSIERS = {
+    "1": ("📁 Projets",    "1 - Projets"),
+    "2": ("🏠 Domaines",   "2 - Domaines"),
+    "3": ("📚 Ressources", "3 - Ressources"),
+    "4": ("🗄️  Archives",   "4 - Archives"),
+}
+
+PARA_EMOJIS = {
+    "1 - Projets":    "🎯",
+    "2 - Domaines":   "🏠",
+    "3 - Ressources": "📚",
+    "4 - Archives":   "🗄️",
+}
+
+def lister_dossiers_notes():
+    script = '''tell application "Notes"
+        set noms to {}
+        repeat with f in folders
+            set end of noms to name of f
+        end repeat
+        return noms
+    end tell'''
+    try:
+        result = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
+        brut = result.stdout.strip()
+        return [d.strip() for d in brut.split(",") if d.strip()]
+    except Exception:
+        return []
+
+def generer_tags_ollama(texte):
+    try:
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={"model": "mistral-nemo", "stream": False,
+                  "prompt": f"À partir du texte suivant, génère 3 à 5 tags de classification courts en français (singulier, minuscules, sans #). Réponds UNIQUEMENT avec les tags séparés par des virgules, rien d'autre.\n\nTexte :\n{texte[:2000]}"},
+            timeout=60
+        )
+        return [t.strip() for t in response.json().get("response", "").strip().split(",") if t.strip()]
+    except Exception:
+        return []
+
+def envoyer_dans_notes(titre, contenu, dossier="3 - Ressources", tags=None):
+    emoji = PARA_EMOJIS.get(dossier, "📝")
+    tags_html = ""
+    if tags:
+        tags_html = "<br><p>" + " ".join(f"#{t}" for t in tags) + "</p>"
+
+    contenu_html = markdown_vers_html(contenu) + tags_html
     contenu_safe = contenu_html.replace('\\', '\\\\').replace('"', '\\"').replace('\r', '')
-    script = f'tell application "Notes" to make new note at folder "Notes" with properties {{name:"{titre}", body:"{contenu_safe}"}}'
+    titre_safe = f"{emoji} {titre}".replace('"', '\\"')
+    dossier_safe = dossier.replace('"', '\\"')
+
+    script = f'''tell application "Notes"
+        set targetFolder to missing value
+        repeat with f in folders
+            if name of f is "{dossier_safe}" then
+                set targetFolder to f
+                exit repeat
+            end if
+        end repeat
+        if targetFolder is missing value then
+            set targetFolder to make new folder with properties {{name:"{dossier_safe}"}}
+        end if
+        make new note at targetFolder with properties {{name:"{titre_safe}", body:"{contenu_safe}"}}
+    end tell'''
+
     try:
         subprocess.run(["osascript", "-e", script], check=True)
-        print("✅ Note créée dans Apple Notes !")
+        print(f"✅ Note créée dans '{dossier}'" + (f" — tags : {', '.join(tags)}" if tags else ""))
     except Exception as e:
         print(f"⚠️  Impossible de créer la note : {e}")
 
 print("\n" + "=" * 60)
 print("ÉTAPE 5: APPLE NOTES")
 print("=" * 60)
+
+dossiers_existants = lister_dossiers_notes()
+
+print("\nOù envoyer la note ?")
+print("  0 - ✨ Créer un nouveau dossier")
+para_noms = [v[1] for v in PARA_DOSSIERS.values()]
+para_presents = [d for d in para_noms if d in dossiers_existants]
+autres = [d for d in dossiers_existants if d not in para_noms]
+tous = para_presents + autres
+
+for i, nom in enumerate(tous, 1):
+    emoji = PARA_EMOJIS.get(nom, "📁")
+    print(f"  {i} - {emoji} {nom}")
+
+choix_dossier = input("\nTon choix : ").strip()
+
+if choix_dossier == "0":
+    dossier_choisi = input("Nom du nouveau dossier : ").strip() or "Ressources"
+elif choix_dossier.isdigit() and 1 <= int(choix_dossier) <= len(tous):
+    dossier_choisi = tous[int(choix_dossier) - 1]
+else:
+    dossier_choisi = "3 - Ressources"
+
+print(f"  ➜ Dossier : {dossier_choisi}")
+
+print("  ➜ Génération des tags automatiques...")
+tags = generer_tags_ollama(final_summary)
+if tags:
+    print(f"  ➜ Tags suggérés : {', '.join(tags)}")
+    tags_input = input("  Modifie ou valide (Entrée pour garder) : ").strip()
+    if tags_input:
+        tags = [t.strip() for t in tags_input.split(",") if t.strip()]
+
 note_titre = f"Transcription - {datetime.now().strftime('%d/%m/%Y %H:%M')}"
-envoyer_dans_notes(note_titre, final_summary)
+envoyer_dans_notes(note_titre, final_summary, dossier=dossier_choisi, tags=tags)
 
 print("\n" + "=" * 60)
 print("✅ TRAITEMENT TERMINÉ AVEC SUCCÈS!")
