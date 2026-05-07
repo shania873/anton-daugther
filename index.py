@@ -14,7 +14,7 @@ from transformers import pipeline
 import yt_dlp
 
 # === Paramètres ===
-VIDEO_URL = "https://www.youtube.com/watch?v=eGSsoSEppNU"   # <-- Remplace par ton lien
+VIDEO_URL = "https://www.youtube.com/watch?v=Fs6YDVJq5As"   # <-- Remplace par ton lien
 
 # === 1. Télécharger l'audio YouTube ===
 print("Téléchargement de la vidéo...")
