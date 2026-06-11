@@ -7,3 +7,15 @@ certifi
 requests
 openai-whisper
 yt-dlp
+
+# livre_audio.py
+edge-tts
+ollama
+pymupdf
+ebooklib
+beautifulsoup4
+langdetect
+pydub
+elevenlabs
+piper-tts
+openai
